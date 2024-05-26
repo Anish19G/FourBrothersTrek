@@ -1,20 +1,41 @@
 import React, { useRef } from 'react'
 import './search-bar.css'
 import { Col, Form, FormGroup } from 'reactstrap'
-const SearchBar = () => {
-    const locationRef = useRef('')
-    const distanceRef = useRef(0)
-    const maxGroupSizeRef = useRef(0)
+import { BASE_URL } from './../utils/config';
+import { useNavigate } from 'react-router-dom';
 
-    const searchHandler = () =>{
-        const location = locationRef.current.value
-        const distance = distanceRef.current.value
-        const maxGroupSize = maxGroupSizeRef.current.value
+const SearchBar = () => {
+    
+    const locationRef = useRef('');
+    const distanceRef = useRef(0);
+    const maxGroupSizeRef = useRef(0);
+    const navigate = useNavigate();
+
+    const searchHandler = async() =>{
+        debugger
+        const location = locationRef.current.value;
+        const distance = distanceRef.current.value;
+        const maxGroupSize = maxGroupSizeRef.current.value;
 
         if(location === '' || distance ==='' || maxGroupSize ===''){
             return alert("All fields are required!");
         }
-    }
+
+        // const res = await fetch(`${BASE_URL}/tours/search/getTourBySearch?city=
+        // ${location}&distance=${distance}&maxGroupSize=${maxGroupSize}`);
+
+
+        const res = await fetch(`${BASE_URL}/tours/search/getTourBySearch?city=${location}&distance=${distance}&maxGroupSize=${maxGroupSize}`)
+
+        if(!res.ok) alert('Something went wrong');
+        const result = await res.json();
+        console.log('res', result.data);
+
+        navigate(
+            `/tours/search?city=${location}&distance=${distance}&maxGroupSize=${maxGroupSize}`, 
+            { state: result.data}  
+        );
+    };
   return <Col lg='12'>
     <div className="search__bar">
         <Form className='d-flex align-items-center gap-4'>
@@ -48,4 +69,4 @@ const SearchBar = () => {
   </Col>
 };
 
-export default SearchBar
+export default SearchBar;

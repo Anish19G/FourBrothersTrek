@@ -5,17 +5,28 @@ import "../styles/tours.css";
 import TourCard from '../shared/TourCard';
 import Newsletter from '../shared/Newsletter';
 import SearchBar from '../shared/SearchBar';
-import tourData from '../assets/data/tours';
+// import tourData from '../assets/data/tours';
 import { Container, Row, Col } from 'reactstrap';
+
+import useFetch from '../hooks/useFetch';
+import { BASE_URL } from '../utils/config';
 
 const Tours = () => {
   const [pageCount, setPageCount] = useState(0);
   const [page, setPage ] = useState(0);
 
+  const {
+    data:tours,
+    loading,
+    error
+  } = useFetch(`${BASE_URL}/tours?page=${page}`);
+  const {data: tourCount} = useFetch(`${BASE_URL}/tours/search/getTourCount`);
+
   useEffect(()=>{
-    const pages = Math.ceil(5 / 4 );
+    const pages = Math.ceil(tourCount / 8 );
     setPageCount(pages);
-  }, [page]);
+    window.scrollTo(0,0);
+  }, [page, tourCount, tours]);
 
   return (
     <>
@@ -27,12 +38,16 @@ const Tours = () => {
         </Row>
       </Container>
     </section>
-    <section>
+    <section className="pt-0"> 
       <Container>
-        <Row>
+        {loading && <h4 className="text-center pt-5">Loading.......</h4>}
+
+        {loading && <h4 className="text-center pt-5">{error}</h4>}
+        {
+          !loading  && !error && <Row>
           {
-            tourData?.map(tour => (
-              <Col lg="3" className="mb-4" key={tour.id}>
+            tours?.map(tour => (
+              <Col lg="3" md="6" sm="6" className="mb-4" key={tour._id}>
               <TourCard tour={tour} />
             </Col>
             ))}
@@ -43,7 +58,7 @@ const Tours = () => {
                 {[ ...Array(pageCount).keys()].map(number => (
                   <span 
                   key={number} 
-                  // onClick={() => setPage(number)}
+                  onClick={() => setPage(number)}
                   className={page === number ? "active__page" : ""}
                   >
                     {number + 1}
@@ -52,6 +67,7 @@ const Tours = () => {
               </div>
             </Col>
         </Row>
+        }
       </Container>
     </section>
     <Newsletter/>
